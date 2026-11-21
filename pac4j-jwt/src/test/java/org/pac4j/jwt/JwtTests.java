@@ -328,9 +328,32 @@ public final class JwtTests implements TestsConstants {
     public void testGenerateAuthenticateNotSigned() {
         val generator = new JwtGenerator();
         generator.setEncryptionConfiguration(new SecretEncryptionConfiguration(MAC_SECRET));
+
         val profile = createProfile();
         val token = generator.generate(profile);
-        assertToken(profile, token);
+
+        val authenticator = new JwtAuthenticator();
+        authenticator.addEncryptionConfiguration(new SecretEncryptionConfiguration(MAC_SECRET));
+
+        assertToken(profile, token, authenticator);
+    }
+
+    @Test
+    public void testEncryptedNotSignedRejectedWithSignatureConfigurations() {
+        val generator = new JwtGenerator();
+        generator.setEncryptionConfiguration(new SecretEncryptionConfiguration(MAC_SECRET));
+        val token = generator.generate(createProfile());
+
+        val authenticator = new JwtAuthenticator(new SecretSignatureConfiguration(MAC_SECRET),
+            new SecretEncryptionConfiguration(MAC_SECRET));
+        val credentials = new TokenCredentials(token);
+        try {
+            authenticator.validate(null, credentials);
+            fail("An encrypted but non-signed JWT must be rejected when signature configurations are defined");
+        } catch (final CredentialsException e) {
+            assertEquals("A non-signed JWT cannot be accepted as signature configurations have been defined", e.getMessage());
+        }
+        assertNull(credentials.getUserProfile());
     }
 
     @Test
