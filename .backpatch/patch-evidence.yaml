@@ -1,0 +1,21 @@
+schema: osera-patch-evidence/0.1.0
+producer: moderne
+release: 5.0.1.1-backpatch-00001
+baseline: v5.0.1+backpatch.baseline
+fixes:
+  - cve: CVE-2021-44878
+    upstream_fix_url: https://github.com/advisories/GHSA-xhw6-hjc9-679m
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2021-44878
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-pac4j/commit/4f2dc84
+    basis: adapted
+    artifacts:
+      - org.pac4j:pac4j-oidc
+    note: New in this release; ported onto 5.0.1; fixed at 5.0.1.1-backpatch-00001 (backpatch-pac4j@4f2dc84).
+tests:
+  commit: 4f2dc840e882e08a1e19ec6b07241f8384b3c1de
+  command: mvn -B -T1 -pl pac4j-oidc -am -Dmaven.test.failure.ignore=true clean test
+  runtime: openjdk version 11.0.20 2023-07-18 LTS, Apache Maven 3.9.16
+  report: pac4j-oidc-5.0.1.1-backpatch-00001-tests.zip
+  report_sha256: ddb271fd1d40c61f3ce6d851f8bd10de3280faeecfeacff3faccc2bbbddc6ec7
+  result: pass
+  note: 820 tests at the patch commit, 0 of them skipped by the suite, 0 failed, 0 errors.
