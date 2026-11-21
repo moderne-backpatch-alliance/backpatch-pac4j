@@ -1,0 +1,21 @@
+schema: osera-patch-evidence/0.1.0
+producer: moderne
+release: 6.0.6.1-backpatch-00001
+baseline: v6.0.6+backpatch.baseline
+fixes:
+  - cve: CVE-2026-29000
+    upstream_fix_url: https://github.com/pac4j/pac4j/commit/2bef15dd0e4a13cc1a9df9145c593fae081d1b2a
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-29000
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-pac4j/commit/3d6d63a
+    basis: adapted
+    artifacts:
+      - org.pac4j:pac4j-jwt
+    note: New in this release; ported onto 6.0.6; fixed at 6.0.6.1-backpatch-00001 (backpatch-pac4j@3d6d63a). Upstream's 6.6.0 also rejects RSA/EC-only encryption without a signature configuration (454d7dbe0); not part of this CVE's fix, not included.
+tests:
+  commit: 3d6d63adc8d73aefa031eb9467045829ea5b46e0
+  command: mvn -B -T1 -pl pac4j-jwt -am -Dmaven.test.failure.ignore=true clean test
+  runtime: openjdk version 17.0.16 2025-07-15 LTS, Apache Maven 3.9.16
+  report: pac4j-jwt-6.0.6.1-backpatch-00001-tests.zip
+  report_sha256: 00eeb318cf8baae5231c7ce7f59a24bac8c2e07ea3c3bdae3fdc5a2916da5269
+  result: pass
+  note: 731 tests at the patch commit, 1 of them skipped by the suite, 0 failed, 0 errors. Upstream 6.6.0 also rejects RSA/EC-only encryption without a signature configuration (454d7dbe0); not part of this CVE fix, not included.
