@@ -1,0 +1,21 @@
+schema: osera-patch-evidence/0.1.0
+producer: moderne
+release: 4.4.0.1-backpatch-00001
+baseline: v4.4.0+backpatch.baseline
+fixes:
+  - cve: CVE-2026-29000
+    upstream_fix_url: https://github.com/pac4j/pac4j/commit/d9c57aa68b8da31a1a90bf08b856ac805c9b23e0
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-29000
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-pac4j/compare/b8977fe~1...e7646df
+    basis: adapted
+    artifacts:
+      - org.pac4j:pac4j-jwt
+    note: New in this release; ported onto 4.4.0; fixed at 4.4.0.1-backpatch-00001 (backpatch-pac4j@b8977fe..e7646df).
+tests:
+  commit: e7646df54640b78e7a15af6ba56fa025583f9bc8
+  command: mvn -B -T1 -pl pac4j-jwt -am -Dmaven.test.failure.ignore=true clean test
+  runtime: openjdk version 11.0.20 2023-07-18 LTS, Apache Maven 3.9.16
+  report: pac4j-jwt-4.4.0.1-backpatch-00001-tests.zip
+  report_sha256: 0de5c99b8bb387d85a7f1f8333244188eae0099d45b20b28f79c61db1e131901
+  result: pass
+  note: 711 tests at the patch commit, 0 of them skipped by the suite, 0 failed, 0 errors.
