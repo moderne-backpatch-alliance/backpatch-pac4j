@@ -315,6 +315,17 @@ public final class JwtTests implements TestsConstants {
     }
 
     @Test
+    public void testEncryptedNotSignedRejectedWhenSignatureConfigured() {
+        final JwtGenerator<FacebookProfile> generator = new JwtGenerator<>();
+        generator.setEncryptionConfiguration(new SecretEncryptionConfiguration(MAC_SECRET));
+        final FacebookProfile profile = createProfile();
+        final String token = generator.generate(profile);
+        final Exception e = TestsHelper.expectException(() -> assertToken(profile, token));
+        assertTrue(e instanceof CredentialsException);
+        assertEquals("A non-signed JWT cannot be accepted as signature configurations have been defined", e.getMessage());
+    }
+
+    @Test
     public void testGenerateAuthenticateAndEncryptedWithRolesPermissions() {
         final JwtGenerator<FacebookProfile> generator = new JwtGenerator<>(new SecretSignatureConfiguration(MAC_SECRET));
         final FacebookProfile profile = createProfile();
