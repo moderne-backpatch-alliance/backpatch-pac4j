@@ -7,6 +7,7 @@ import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.auth.Secret;
 import com.nimbusds.oauth2.sdk.id.ClientID;
 import com.nimbusds.openid.connect.sdk.Nonce;
+import com.nimbusds.openid.connect.sdk.OIDCResponseTypeValue;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import org.pac4j.core.exception.TechnicalException;
@@ -31,7 +32,10 @@ public class TokenValidator {
 
     private final List<IDTokenValidator> idTokenValidators;
 
+    protected final OidcConfiguration configuration;
+
     public TokenValidator(final OidcConfiguration configuration) {
+        CommonHelper.assertNotNull("configuration", configuration);
 
         // check algorithms
         final var metadataAlgorithms = configuration.findProviderMetadata().getIDTokenJWSAlgs();
@@ -52,13 +56,18 @@ public class TokenValidator {
         final var _secret = new Secret(configuration.getSecret());
 
         for (var jwsAlgorithm : jwsAlgorithms) {
-            if ("none".equals(jwsAlgorithm.getName())) {
-                jwsAlgorithm = null;
-            }
-
             // build validator
             final IDTokenValidator idTokenValidator;
-            if (jwsAlgorithm == null) {
+            if ("none".equals(jwsAlgorithm.getName())) {
+                final String responseType = configuration.getResponseType();
+                final boolean responseTypeContainsIdToken = responseType != null
+                    && responseType.contains(OIDCResponseTypeValue.ID_TOKEN.toString());
+                if (!configuration.isAllowUnsignedIdTokens() || responseTypeContainsIdToken) {
+                    throw new TechnicalException("Unsigned ID tokens are not allowed: " +
+                        "they must be explicitly enabled on client side and " +
+                        "the response_type used must return no ID Token from the authorization endpoint");
+                }
+                logger.warn("Allowing unsigned ID tokens");
                 idTokenValidator = new IDTokenValidator(configuration.findProviderMetadata().getIssuer(), _clientID);
             } else if (CommonHelper.isNotBlank(configuration.getSecret()) && (JWSAlgorithm.HS256.equals(jwsAlgorithm) ||
                 JWSAlgorithm.HS384.equals(jwsAlgorithm) || JWSAlgorithm.HS512.equals(jwsAlgorithm))) {
@@ -70,6 +79,8 @@ public class TokenValidator {
 
             idTokenValidators.add(idTokenValidator);
         }
+
+        this.configuration = configuration;
     }
 
     protected IDTokenValidator createRSATokenValidator(final OidcConfiguration configuration,
@@ -111,5 +122,10 @@ public class TokenValidator {
         } else {
             throw new TechnicalException("Unable to validate the ID token");
         }
+    }
+
+    // for tests
+    List<IDTokenValidator> getIdTokenValidators() {
+        return idTokenValidators;
     }
 }
